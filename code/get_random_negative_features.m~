@@ -38,20 +38,19 @@ num_images = length(image_files);
 
 features_neg = [];
 i = 0;
-while i < num_samples
-    n = randi(num_images);
-    absolute_path = strcat(non_face_scn_path, '/', image_files(n).name);
-    negative_image = imread(absolute_path);
+while i ~= num_samples
+        absolute_path = strcat(non_face_scn_path, '/', image_files(n).name);
+        negative_image = imread(absolute_path);
 
-    random_x_position = randi(size(negative_image, 2) - 36);
-    random_y_position = randi(size(negative_image, 1) - 36);
+        random_x_position = randi(size(negative_image, 2) - 36);
+        random_y_position = randi(size(negative_image, 1) - 36);
 
-    negative_image = imcrop(negative_image, [random_x_position random_y_position 35 35]);
+        negative_image = imcrop(negative_image, [random_x_position random_y_position 35 35]);
 
-    hog = vl_hog(single(negative_image), feature_params.hog_cell_size);
-    hog_vec = transpose(hog(:));
-    features_neg = [features_neg; hog_vec];
-    i = i + 1;
+        hog = vl_hog(single(negative_image), feature_params.hog_cell_size);
+        hog_vec = transpose(hog(:));
+        features_neg = [features_neg; hog_vec];
+        i = i + 1;
 end
 
 % placeholder to be deleted

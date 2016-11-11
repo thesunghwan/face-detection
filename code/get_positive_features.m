@@ -37,6 +37,7 @@ for n = 1:num_images
     hog = vl_hog(single(positive_image), feature_params.hog_cell_size);
     hog_vec = transpose(hog(:));
     features_pos = [features_pos; hog_vec];
+    disp(n);
 end
 
 % placeholder to be deleted

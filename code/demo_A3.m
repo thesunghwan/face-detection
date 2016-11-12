@@ -45,6 +45,7 @@ data_path = '../data/'; %change if you want to work with a network copy
 train_path_pos = fullfile(data_path, 'caltech_faces/Caltech_CropFaces'); %Positive training examples. 36x36 head crops
 non_face_scn_path = fullfile(data_path, 'train_non_face_scenes'); %We can mine random or hard negatives from here
 test_scn_path = fullfile(data_path,'test_scenes/test_jpg'); %CMU+MIT test scenes
+%test_scn_path = fullfile(data_path,'test_scenes/test_jpg_small'); %CMU+MIT test scenes
 label_path = fullfile(data_path,'test_scenes/ground_truth_bboxes.txt'); %the ground truth face locations in the test set
 % test_scn_path = fullfile(data_path,'extra_test_scenes'); %test on your own images!
 
@@ -58,10 +59,21 @@ feature_params = struct('template_size', 36, 'hog_cell_size', 6);
 %% Step 1. Load positive training crops and random negative examples
 %YOU CODE 'get_positive_features' and 'get_random_negative_features'
 
-features_pos = get_positive_features( train_path_pos, feature_params );
+if exist('../data/features_pos.mat', 'file') == 2
+    load('../data/features_pos.mat');
+else
+    features_pos = get_positive_features( train_path_pos, feature_params );
+    save('../data/features_pos.mat','features_pos');
+end
 
-num_negative_examples = 10000; %Higher will work strictly better, but you should start with 10000 for debugging
-features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
+
+if exist('../data/features_neg.mat', 'file') == 2
+    load('../data/features_neg.mat');
+else
+    num_negative_examples = 10000; %Higher will work strictly better, but you should start with 10000 for debugging
+    features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
+    save('../data/features_neg.mat','features_neg');
+end
 
     
 %% step 2. Train Classifier
@@ -75,7 +87,7 @@ features_neg = get_random_negative_features( non_face_scn_path, feature_params, 
 %YOU CODE classifier training. Make sure the outputs are 'w' and 'b'.
 X = [features_pos; features_neg];
 y = [ones(size(features_pos, 1), 1); -ones(size(features_neg, 1), 1)];
-[w, b] = vl_svmtrain(transpose(X), y, 0.001);
+[w, b] = vl_svmtrain(transpose(X), y, 0.0001);
 %w = rand((feature_params.template_size / feature_params.hog_cell_size)^2 * 31,1); %placeholder, delete
 %b = rand(1); %placeholder, delete
 

@@ -46,7 +46,7 @@ bboxes = zeros(0,4);
 confidences = zeros(0,1);
 image_ids = cell(0,1);
 
-threshold = 0.8;
+threshold = 0.9;
 resize_interval = 4;
 interval = 6;
 

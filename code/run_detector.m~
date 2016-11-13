@@ -46,7 +46,7 @@ bboxes = zeros(0,4);
 confidences = zeros(0,1);
 image_ids = cell(0,1);
 
-threshold = 0.8;
+threshold = 0.7;
 resize_interval = 4;
 interval = 6;
 
@@ -113,9 +113,9 @@ for i = 1:length(test_scenes)
     %end
     j = 1;
     %for j = 1:-0.05:0.001
-    resized_img = img;
-    while size(resized_img, 1) > 36 && size(resized_img, 2) > 36
-        %resized_img = imresize(img, j,'Antialiasing',false);
+    resized-
+    while size(resized_img, 1) > j * 4 && size(resized_img, 2) > j * 4
+        resized_img = imresize(img, j,'Antialiasing',false);
         img_hog = vl_hog(resized_img, feature_params.hog_cell_size);
         difference = size(img) ./ size(resized_img);
 
@@ -136,8 +136,6 @@ for i = 1:length(test_scenes)
                 end
             end
         end
-        j = j - 0.01;
-        resized_img = imresize(img, j,'Antialiasing',false);
     end
 
     

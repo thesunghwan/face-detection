@@ -34,7 +34,11 @@ features_pos = [];
 for n = 1:num_images
     absolute_path = strcat(train_path_pos, '/', image_files(n).name);
     positive_image = imread(absolute_path);
-    hog = vl_hog(single(positive_image), feature_params.hog_cell_size);
+    positive_image = single(positive_image)/255;
+    if(size(positive_image,3) > 1)
+        positive_image = rgb2gray(positive_image);
+    end
+    hog = vl_hog(positive_image, feature_params.hog_cell_size);
     hog_vec = transpose(hog(:));
     features_pos = [features_pos; hog_vec];
 end

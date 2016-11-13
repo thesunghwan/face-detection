@@ -42,13 +42,17 @@ while i < num_samples
     n = randi(num_images);
     absolute_path = strcat(non_face_scn_path, '/', image_files(n).name);
     negative_image = imread(absolute_path);
+    negative_image = single(negative_image)/255;
+    if(size(negative_image,3) > 1)
+        negative_image = rgb2gray(negative_image);
+    end
 
     random_x_position = randi(size(negative_image, 2) - 36);
     random_y_position = randi(size(negative_image, 1) - 36);
 
     negative_image = imcrop(negative_image, [random_x_position random_y_position 35 35]);
 
-    hog = vl_hog(single(negative_image), feature_params.hog_cell_size);
+    hog = vl_hog(negative_image, feature_params.hog_cell_size);
     hog_vec = transpose(hog(:));
     features_neg = [features_neg; hog_vec];
     i = i + 1;

@@ -70,9 +70,9 @@ end
 if exist('../data/features_neg.mat', 'file') == 2
     load('../data/features_neg.mat');
 else
-    num_negative_examples = 1000; %Higher will work strictly better, but you should start with 10000 for debugging
-    features_neg = [features_neg; get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples)];
-    %features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
+    num_negative_examples = 10000; %Higher will work strictly better, but you should start with 10000 for debugging
+    %features_neg = [features_neg; get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples)];
+    features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
     save('../data/features_neg.mat','features_neg');
 end
 

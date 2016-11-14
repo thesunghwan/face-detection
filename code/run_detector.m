@@ -46,7 +46,8 @@ bboxes = zeros(0,4);
 confidences = zeros(0,1);
 image_ids = cell(0,1);
 
-threshold = 0.9;
+threshold = 0.7;
+ratio_reduction = 0.01;
 resize_interval = 4;
 interval = 6;
 
@@ -58,40 +59,9 @@ for i = 1:length(test_scenes)
         img = rgb2gray(img);
     end
     
-    
-    %resized_img = img;
-    
-    %img_hog = vl_hog(img, feature_params.hog_cell_size);
-    
     cur_bboxes = zeros(0,4);
     cur_confidences = zeros(0,1);
     cur_image_ids = cell(0,1);
-    %for j = 0:resize_interval:(resize_interval*30)
-    %j = 0;
-    %while size(resized_img, 1) > j * 4 && size(resized_img, 2) > j * 4
-    %    for m = 1:(size(img_hog, 1) - feature_params.template_size)
-    %        for n = 1:(size(img_hog, 2) - feature_params.template_size)
-    %            hog_window = img_hog(m:m+feature_params.hog_cell_size-1, n:n+feature_params.hog_cell_size-1, :);
-    %            hog_window_vec = transpose(hog_window(:));
-
-    %            confidence = hog_window_vec * w + b;
-    %            if confidence > threshold
-    %                cur_x_min = n * feature_params.hog_cell_size;
-    %                cur_y_min = m * feature_params.hog_cell_size;
-    %                cur_bbox = [cur_x_min - j/2, cur_y_min - j/2, cur_x_min + feature_params.template_size + j/2 - 1, cur_y_min + feature_params.template_size + j/2 - 1];
-    %                cur_confidence = confidence;
-    %                cur_image_id = test_scenes(i).name;
-    %                cur_bboxes = [cur_bboxes; cur_bbox];
-    %                cur_confidences = [cur_confidences; cur_confidence];
-    %                cur_image_ids = [cur_image_ids; cur_image_id];
-    %            end
-    %        end
-    %    end
-        %j = j + resize_interval;
-    %    resized_img = imresize(img, size(img) - resize_interval,'Antialiasing',false);
-    %    img_hog = vl_hog(resized_img, feature_params.hog_cell_size);
-    %end
-    
     
     
     %for m = 1:(size(img_hog, 1) - feature_params.template_size)
@@ -111,11 +81,13 @@ for i = 1:length(test_scenes)
     %        end
     %    end
     %end
+    
+    
     j = 1;
     %for j = 1:-0.05:0.001
     resized_img = img;
     while size(resized_img, 1) > 36 && size(resized_img, 2) > 36
-        %resized_img = imresize(img, j,'Antialiasing',false);
+    %    resized_img = imresize(img, j,'Antialiasing',false);
         img_hog = vl_hog(resized_img, feature_params.hog_cell_size);
         difference = size(img) ./ size(resized_img);
 
@@ -136,11 +108,40 @@ for i = 1:length(test_scenes)
                 end
             end
         end
-        j = j - 0.01;
+        j = j - ratio_reduction;
         resized_img = imresize(img, j,'Antialiasing',false);
     end
 
     
+    %resize by pixel
+    %j = 0;
+    %for j = 1:-0.05:0.001
+    %resized_img = img;
+    %while size(resized_img, 1) > 36 && size(resized_img, 2) > 36
+        %resized_img = imresize(img, j,'Antialiasing',false);
+    %    img_hog = vl_hog(resized_img, feature_params.hog_cell_size);
+    %    difference = size(img) ./ size(resized_img);
+
+    %    for m = 1:(size(img_hog, 1) - feature_params.hog_cell_size)
+    %        for n = 1:(size(img_hog, 2) - feature_params.hog_cell_size)
+    %            hog_window = img_hog(m:m+feature_params.hog_cell_size-1, n:n+feature_params.hog_cell_size-1, :);
+    %            hog_window_vec = transpose(hog_window(:));
+    %            confidence = hog_window_vec * w + b;
+    %            if confidence > threshold
+    %                cur_x_min = n * feature_params.hog_cell_size * difference(2);
+    %                cur_y_min = m * feature_params.hog_cell_size * difference(1);
+    %                cur_bbox = [cur_x_min, cur_y_min, cur_x_min + (feature_params.template_size- 1) * difference(2), cur_y_min + (feature_params.template_size - 1) * difference(1)];
+    %                cur_confidence = confidence;
+    %                cur_image_id = test_scenes(i).name;
+    %                cur_bboxes = [cur_bboxes; cur_bbox];
+    %                cur_confidences = [cur_confidences; cur_confidence];
+    %                cur_image_ids = [cur_image_ids; cur_image_id];
+    %            end
+    %        end
+    %    end
+    %    j = j + 3;
+    %    resized_img = imresize(img, size(img)- [j * (size(img, 1)/size(img, 2)), j],'Antialiasing',false);
+    %end
     
     
     

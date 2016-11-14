@@ -46,16 +46,31 @@ while i < num_samples
     if(size(negative_image,3) > 1)
         negative_image = rgb2gray(negative_image);
     end
-
-    random_x_position = randi(size(negative_image, 2) - 36);
-    random_y_position = randi(size(negative_image, 1) - 36);
-
-    negative_image = imcrop(negative_image, [random_x_position random_y_position 35 35]);
-
+    
+    negative_image = imresize(negative_image, (1 - 0.7)*rand(1) + 0.7);
     hog = vl_hog(negative_image, feature_params.hog_cell_size);
-    hog_vec = transpose(hog(:));
-    features_neg = [features_neg; hog_vec];
-    i = i + 1;
+    for n = 1:50
+        x = size(hog, 1)-6;
+        y = size(hog, 2)-6;
+
+        random_x_position = randi(x);
+        random_y_position = randi(y);
+        image = hog(random_x_position:random_x_position+5, random_y_position:random_y_position+5, :);
+        hog_vec = transpose(image(:));
+        features_neg = [features_neg; hog_vec];
+        i = i + 1;
+    end
+    
+
+    %random_x_position = randi(size(negative_image, 2) - 36);
+    %random_y_position = randi(size(negative_image, 1) - 36);
+
+    %negative_image = imcrop(negative_image, [random_x_position random_y_position 35 35]);
+
+    %hog = vl_hog(negative_image, feature_params.hog_cell_size);
+    %hog_vec = transpose(hog(:));
+    %features_neg = [features_neg; hog_vec];
+    %i = i + 1;
 end
 
 % placeholder to be deleted

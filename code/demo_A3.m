@@ -45,15 +45,16 @@ data_path = '../data/'; %change if you want to work with a network copy
 train_path_pos = fullfile(data_path, 'caltech_faces/Caltech_CropFaces'); %Positive training examples. 36x36 head crops
 non_face_scn_path = fullfile(data_path, 'train_non_face_scenes'); %We can mine random or hard negatives from here
 test_scn_path = fullfile(data_path,'test_scenes/test_jpg'); %CMU+MIT test scenes
+hard_negative_path = fullfile(data_path, 'hard_negatives');
 %test_scn_path = fullfile(data_path,'test_scenes/test_jpg_small'); %CMU+MIT test scenes
 label_path = fullfile(data_path,'test_scenes/ground_truth_bboxes.txt'); %the ground truth face locations in the test set
-% test_scn_path = fullfile(data_path,'extra_test_scenes'); %test on your own images!
+%test_scn_path = fullfile(data_path,'extra_test_scenes'); %test on your own images!
 
 %The faces are 36x36 pixels, which works fine as a template size. You could
 %add other fields to this struct if you want to modify HoG default
 %parameters such as the number of orientations, but that does not help
 %performance in our limited test.
-feature_params = struct('template_size', 36, 'hog_cell_size', 6);
+feature_params = struct('template_size', 36, 'hog_cell_size', 3);
 
 
 %% Step 1. Load positive training crops and random negative examples
@@ -71,8 +72,8 @@ if exist('../data/features_neg.mat', 'file') == 2
     load('../data/features_neg.mat');
 else
     num_negative_examples = 10000; %Higher will work strictly better, but you should start with 10000 for debugging
-    %features_neg = [features_neg; get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples)];
-    features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
+    features_neg = [features_neg; get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples)];
+    %features_neg = get_random_negative_features( non_face_scn_path, feature_params, num_negative_examples);
     save('../data/features_neg.mat','features_neg');
 end
 
@@ -89,6 +90,19 @@ end
 X = [features_pos; features_neg];
 y = [ones(size(features_pos, 1), 1); -ones(size(features_neg, 1), 1)];
 [w, b] = vl_svmtrain(transpose(X), y, 0.0001);
+
+
+%hard negative
+hard_negatives = get_hard_negatives( non_face_scn_path, feature_params, 2000, w, b );
+features_neg = [features_neg; hard_negatives];
+X = [features_pos; features_neg];
+y = [ones(size(features_pos, 1), 1); -ones(size(features_neg, 1), 1)];
+[w, b] = vl_svmtrain(transpose(X), y, 0.0001);
+
+
+
+
+
 %w = rand((feature_params.template_size / feature_params.hog_cell_size)^2 * 31,1); %placeholder, delete
 %b = rand(1); %placeholder, delete
 
@@ -160,7 +174,8 @@ imwrite(hog_template_image, 'visualizations/hog_template.png')
     evaluate_detections(bboxes, confidences, image_ids, label_path);
 
 visualize_detections_by_image(bboxes, confidences, image_ids, tp, fp, test_scn_path, label_path)
-% visualize_detections_by_image_no_gt(bboxes, confidences, image_ids, test_scn_path)
+
+%visualize_detections_by_image_no_gt(bboxes, confidences, image_ids, test_scn_path)
 
 % visualize_detections_by_confidence(bboxes, confidences, image_ids, test_scn_path, label_path);
 

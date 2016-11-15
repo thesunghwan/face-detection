@@ -47,20 +47,26 @@ while i < num_samples
         negative_image = rgb2gray(negative_image);
     end
     
-    negative_image = imresize(negative_image, (1 - 0.7)*rand(1) + 0.7);
+    negative_image = imresize(negative_image, (1 - 0.3)*rand(1) + 0.3);
     hog = vl_hog(negative_image, feature_params.hog_cell_size);
-    for n = 1:50
-        x = size(hog, 1)-6;
-        y = size(hog, 2)-6;
-
-        random_x_position = randi(x);
-        random_y_position = randi(y);
-        image = hog(random_x_position:random_x_position+5, random_y_position:random_y_position+5, :);
-        hog_vec = transpose(image(:));
-        features_neg = [features_neg; hog_vec];
-        i = i + 1;
-    end
     
+    
+    hog_size = feature_params.template_size / feature_params.hog_cell_size;
+
+    if size(hog, 1) > hog_size && size(hog, 2) > hog_size
+        for n = 1:50
+            x = size(hog, 1) - hog_size;
+            y = size(hog, 2) - hog_size;
+
+            random_x_position = randi(x);
+            random_y_position = randi(y);
+            
+            image = hog(random_x_position:random_x_position+hog_size-1, random_y_position:random_y_position+hog_size-1, :);
+            hog_vec = transpose(image(:));
+            features_neg = [features_neg; hog_vec];
+            i = i + 1;
+        end
+    end
 
     %random_x_position = randi(size(negative_image, 2) - 36);
     %random_y_position = randi(size(negative_image, 1) - 36);

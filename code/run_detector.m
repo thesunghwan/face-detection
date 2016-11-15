@@ -46,10 +46,11 @@ bboxes = zeros(0,4);
 confidences = zeros(0,1);
 image_ids = cell(0,1);
 
-threshold = 0.7;
-ratio_reduction = 0.01;
-resize_interval = 4;
-interval = 6;
+threshold = -0.5;
+ratio_reduction = 0.06;
+hog_size = feature_params.template_size / feature_params.hog_cell_size;
+%resize_interval = 4;
+%interval = 6;
 
 for i = 1:length(test_scenes)
     fprintf('Detecting faces in %s\n', test_scenes(i).name)
@@ -63,37 +64,15 @@ for i = 1:length(test_scenes)
     cur_confidences = zeros(0,1);
     cur_image_ids = cell(0,1);
     
-    
-    %for m = 1:(size(img_hog, 1) - feature_params.template_size)
-    %    for n = 1:(size(img_hog, 2) - feature_params.template_size)
-    %        hog_window = img_hog(m:m+feature_params.hog_cell_size-1, n:n+feature_params.hog_cell_size-1, :);
-    %        hog_window_vec = transpose(hog_window(:));
-    %        confidence = hog_window_vec * w + b;
-    %        if confidence > threshold
-    %            cur_x_min = n * feature_params.hog_cell_size;
-    %            cur_y_min = m * feature_params.hog_cell_size;
-    %            cur_bbox = [cur_x_min, cur_y_min, cur_x_min + feature_params.template_size- 1, cur_y_min + feature_params.template_size - 1];
-    %            cur_confidence = confidence;
-    %            cur_image_id = test_scenes(i).name;
-    %            cur_bboxes = [cur_bboxes; cur_bbox];
-    %            cur_confidences = [cur_confidences; cur_confidence];
-    %            cur_image_ids = [cur_image_ids; cur_image_id];
-    %        end
-    %    end
-    %end
-    
-    
     j = 1;
-    %for j = 1:-0.05:0.001
     resized_img = img;
     while size(resized_img, 1) > 36 && size(resized_img, 2) > 36
-    %    resized_img = imresize(img, j,'Antialiasing',false);
         img_hog = vl_hog(resized_img, feature_params.hog_cell_size);
         difference = size(img) ./ size(resized_img);
 
-        for m = 1:(size(img_hog, 1) - feature_params.hog_cell_size)
-            for n = 1:(size(img_hog, 2) - feature_params.hog_cell_size)
-                hog_window = img_hog(m:m+feature_params.hog_cell_size-1, n:n+feature_params.hog_cell_size-1, :);
+        for m = 1:(size(img_hog, 1) - hog_size)
+            for n = 1:(size(img_hog, 2) - hog_size)
+                hog_window = img_hog(m:m+hog_size-1, n:n+hog_size-1, :);
                 hog_window_vec = transpose(hog_window(:));
                 confidence = hog_window_vec * w + b;
                 if confidence > threshold
@@ -109,93 +88,9 @@ for i = 1:length(test_scenes)
             end
         end
         j = j - ratio_reduction;
-        resized_img = imresize(img, j,'Antialiasing',false);
+        resized_img = imresize(img, j,'Antialiasing',true);
     end
 
-    
-    %resize by pixel
-    %j = 0;
-    %for j = 1:-0.05:0.001
-    %resized_img = img;
-    %while size(resized_img, 1) > 36 && size(resized_img, 2) > 36
-        %resized_img = imresize(img, j,'Antialiasing',false);
-    %    img_hog = vl_hog(resized_img, feature_params.hog_cell_size);
-    %    difference = size(img) ./ size(resized_img);
-
-    %    for m = 1:(size(img_hog, 1) - feature_params.hog_cell_size)
-    %        for n = 1:(size(img_hog, 2) - feature_params.hog_cell_size)
-    %            hog_window = img_hog(m:m+feature_params.hog_cell_size-1, n:n+feature_params.hog_cell_size-1, :);
-    %            hog_window_vec = transpose(hog_window(:));
-    %            confidence = hog_window_vec * w + b;
-    %            if confidence > threshold
-    %                cur_x_min = n * feature_params.hog_cell_size * difference(2);
-    %                cur_y_min = m * feature_params.hog_cell_size * difference(1);
-    %                cur_bbox = [cur_x_min, cur_y_min, cur_x_min + (feature_params.template_size- 1) * difference(2), cur_y_min + (feature_params.template_size - 1) * difference(1)];
-    %                cur_confidence = confidence;
-    %                cur_image_id = test_scenes(i).name;
-    %                cur_bboxes = [cur_bboxes; cur_bbox];
-    %                cur_confidences = [cur_confidences; cur_confidence];
-    %                cur_image_ids = [cur_image_ids; cur_image_id];
-    %            end
-    %        end
-    %    end
-    %    j = j + 3;
-    %    resized_img = imresize(img, size(img)- [j * (size(img, 1)/size(img, 2)), j],'Antialiasing',false);
-    %end
-    
-    
-    
-    %cur_bboxes = zeros(0,4);
-    %cur_confidences = zeros(0,1);
-    %cur_image_ids = cell(0,1);
-    %resized_img = img;
-    
-    %for j = 0:resize_interval:(resize_interval*3)
-    %    for n = 1:interval:(size(resized_img, 1) - feature_params.template_size)
-    %        for m = 1:interval:(size(resized_img, 2) - feature_params.template_size)
-    %           window = resized_img(n:n+feature_params.template_size-1, m:m+feature_params.template_size-1);
-    %           hog = vl_hog(window, feature_params.hog_cell_size);
-    %           hog_vec = transpose(hog(:));
-
-    %           confidence = hog_vec * w + b;
-    %           if confidence >= threshold
-    %              cur_x_min = m;
-    %              cur_y_min = n;
-    %              cur_bbox = [cur_x_min-j/2, cur_y_min-j/2, cur_x_min + feature_params.template_size + j/2 - 1, cur_y_min + feature_params.template_size + j/2 - 1];
-    %              cur_confidence = confidence;
-    %              cur_image_id = test_scenes(i).name;
-
-    %              cur_bboxes = [cur_bboxes; cur_bbox];
-    %              cur_confidences = [cur_confidences; cur_confidence];
-    %              cur_image_ids = [cur_image_ids; cur_image_id];
-    %            end
-    %        end
-    %    end
-        
-    %    resized_img = imresize(img, size(img) - resize_interval);
-    %end
-    
-    %for n = 1:interval:(size(img, 1) - feature_params.template_size)
-    %    for m = 1:interval:(size(img, 2) - feature_params.template_size)
-    %       window = img(n:n+feature_params.template_size-1, m:m+feature_params.template_size-1);
-    %       hog = vl_hog(window, feature_params.hog_cell_size);
-    %       hog_vec = transpose(hog(:));
-    %   
-    %       confidence = hog_vec * w + b;
-    %       if confidence >= threshold
-    %          cur_x_min = m;
-    %          cur_y_min = n;
-    %          cur_bbox = [cur_x_min, cur_y_min, cur_x_min + feature_params.template_size-1, cur_y_min + feature_params.template_size-1];
-    %          cur_confidence = confidence;
-    %          cur_image_id = test_scenes(i).name;
-    %          
-    %          cur_bboxes = [cur_bboxes; cur_bbox];
-    %          cur_confidences = [cur_confidences; cur_confidence];
-    %          cur_image_ids = [cur_image_ids; cur_image_id];
-    %        end
-    %    end
-    %end
-    
     
     
     

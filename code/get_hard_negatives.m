@@ -35,6 +35,7 @@ while i < num_samples
                 end
             end
         end
+        disp(i);
         j = j - ratio_reduction;
         resized_img = imresize(negative_image, j,'Antialiasing',true);
     end

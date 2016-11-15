@@ -93,11 +93,11 @@ y = [ones(size(features_pos, 1), 1); -ones(size(features_neg, 1), 1)];
 
 
 %hard negative
-hard_negatives = get_hard_negatives( non_face_scn_path, feature_params, 2000, w, b );
-features_neg = [features_neg; hard_negatives];
-X = [features_pos; features_neg];
-y = [ones(size(features_pos, 1), 1); -ones(size(features_neg, 1), 1)];
-[w, b] = vl_svmtrain(transpose(X), y, 0.0001);
+%hard_negatives = get_hard_negatives( non_face_scn_path, feature_params, 1000, w, b );
+%features_neg = [features_neg; hard_negatives];
+%X = [features_pos; features_neg];
+%y = [ones(size(features_pos, 1), 1); -ones(size(features_neg, 1), 1)];
+%[w, b] = vl_svmtrain(transpose(X), y, 0.0001);
 
 
 

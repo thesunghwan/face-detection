@@ -46,10 +46,10 @@ bboxes = zeros(0,4);
 confidences = zeros(0,1);
 image_ids = cell(0,1);
 
-threshold = 0;
+threshold = -0.;
 ratio_reduction = 0.06;
 hog_size = feature_params.template_size / feature_params.hog_cell_size;
-%resize_intervgal = 4;
+%resize_interval = 4;
 %interval = 6;
 
 for i = 1:length(test_scenes)
